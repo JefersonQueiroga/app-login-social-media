@@ -1,24 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as AuthSession from 'expo-auth-session';
-import * as Crypto from 'expo-crypto';
-import * as WebBrowser from 'expo-web-browser';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { oauthConfig } from '../services/oauthConfig';
-
-WebBrowser.maybeCompleteAuthSession();
 
 interface User {
   id: string;
   name: string;
   email: string;
-  picture?: string;
-  provider: 'google' | 'github';
+  photo?: string;
+  provider: 'google';
 }
 
 interface AuthContextData {
   user: User | null;
   signInWithGoogle: () => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
   signOut: () => Promise<void>;
   isLoading: boolean;
 }
@@ -30,8 +24,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    configureGoogleSignIn();
     loadStoredUser();
   }, []);
+
+  function configureGoogleSignIn() {
+    GoogleSignin.configure({
+      webClientId: '331594167804-4qgvncnrmc78aude5auvn9s01iacm5bd.apps.googleusercontent.com', // Substitua pelo seu
+      offlineAccess: true,
+    });
+  }
 
   async function loadStoredUser() {
     try {
@@ -49,143 +51,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signInWithGoogle() {
     try {
       setIsLoading(true);
+      
+      // Verifica se o Google Play Services está disponível
+      await GoogleSignin.hasPlayServices();
+      
+      // Faz o login
+      const userInfo = await GoogleSignin.signIn();
+      
+      if (userInfo.data?.user) {
+        const googleUser: User = {
+          id: userInfo.data.user.id,
+          name: userInfo.data.user.name || '',
+          email: userInfo.data.user.email,
+          photo: userInfo.data.user.photo || undefined,
+          provider: 'google',
+        };
 
-      // Configurar requisição OAuth Google
-      const request = new AuthSession.AuthRequest({
-        clientId: oauthConfig.google.clientId,
-        scopes: ['openid', 'profile', 'email'],
-        redirectUri: AuthSession.makeRedirectUri({ scheme: 'socialloginapp' }),
-        responseType: AuthSession.ResponseType.Code,
-        state: Crypto.randomUUID(),
-        codeChallenge: await AuthSession.AuthRequest.makeCodeChallengeAsync(),
-        usePKCE: true,
-      });
-
-      // Fazer login
-      const result = await request.promptAsync({
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-      });
-
-      if (result.type === 'success' && result.params.code) {
-        // Trocar código por token de acesso
-        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            client_id: oauthConfig.google.clientId,
-            code: result.params.code,
-            grant_type: 'authorization_code',
-            redirect_uri: request.redirectUri,
-            code_verifier: request.codeVerifier || '',
-          }).toString(),
-        });
-
-        const tokenData = await tokenResponse.json();
-
-        if (tokenData.access_token) {
-          // Buscar dados do usuário
-          const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-            headers: {
-              Authorization: `Bearer ${tokenData.access_token}`,
-            },
-          });
-
-          const userData = await userResponse.json();
-
-          // Criar objeto de usuário
-          const googleUser: User = {
-            id: userData.id,
-            name: userData.name,
-            email: userData.email,
-            picture: userData.picture,
-            provider: 'google',
-          };
-
-          setUser(googleUser);
-          await AsyncStorage.setItem('@social_login:user', JSON.stringify(googleUser));
-        }
+        setUser(googleUser);
+        await AsyncStorage.setItem('@social_login:user', JSON.stringify(googleUser));
       }
     } catch (error: any) {
       console.error('Erro no login com Google:', error);
-      throw new Error('Falha ao fazer login com Google');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function signInWithGitHub() {
-    try {
-      setIsLoading(true);
-
-      // Configurar requisição OAuth GitHub
-      const request = new AuthSession.AuthRequest({
-        clientId: oauthConfig.github.clientId,
-        scopes: ['user:email', 'read:user'],
-        redirectUri: AuthSession.makeRedirectUri({ scheme: 'socialloginapp' }),
-        responseType: AuthSession.ResponseType.Code,
-        state: Crypto.randomUUID(),
-      });
-
-      // Fazer login
-      const result = await request.promptAsync({
-        authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-      });
-
-      if (result.type === 'success' && result.params.code) {
-        // Trocar código por token de acesso
-        const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            client_id: oauthConfig.github.clientId,
-            client_secret: oauthConfig.github.clientSecret,
-            code: result.params.code,
-          }),
-        });
-
-        const tokenData = await tokenResponse.json();
-
-        if (tokenData.access_token) {
-          // Buscar dados do usuário
-          const userResponse = await fetch('https://api.github.com/user', {
-            headers: {
-              Authorization: `Bearer ${tokenData.access_token}`,
-            },
-          });
-
-          const userData = await userResponse.json();
-
-          // Buscar email (pode ser privado)
-          const emailResponse = await fetch('https://api.github.com/user/emails', {
-            headers: {
-              Authorization: `Bearer ${tokenData.access_token}`,
-            },
-          });
-
-          const emailData = await emailResponse.json();
-          const primaryEmail = emailData.find((email: any) => email.primary)?.email || userData.email;
-
-          // Criar objeto de usuário
-          const githubUser: User = {
-            id: userData.id.toString(),
-            name: userData.name || userData.login,
-            email: primaryEmail || '',
-            picture: userData.avatar_url,
-            provider: 'github',
-          };
-
-          setUser(githubUser);
-          await AsyncStorage.setItem('@social_login:user', JSON.stringify(githubUser));
-        }
+      
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        throw new Error('Login cancelado pelo usuário');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        throw new Error('Login já em progresso');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        throw new Error('Google Play Services não disponível');
+      } else {
+        throw new Error('Falha ao fazer login com Google');
       }
-    } catch (error: any) {
-      console.error('Erro no login com GitHub:', error);
-      throw new Error('Falha ao fazer login com GitHub');
     } finally {
       setIsLoading(false);
     }
@@ -194,6 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     try {
       setIsLoading(true);
+      
+      // Sign out do Google
+      await GoogleSignin.signOut();
+      
       setUser(null);
       await AsyncStorage.removeItem('@social_login:user');
     } catch (error) {
@@ -208,7 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         signInWithGoogle,
-        signInWithGitHub,
         signOut,
         isLoading,
       }}

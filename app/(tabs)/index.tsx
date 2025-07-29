@@ -1,13 +1,13 @@
 import { AntDesign, Feather } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,25 +26,6 @@ export default function HomeScreen() {
     );
   };
 
-  const getProviderIcon = () => {
-    switch (user?.provider) {
-      case 'google':
-        return <AntDesign name="google" size={24} color="#4285F4" />;
-      case 'github':
-        return <AntDesign name="github" size={24} color="#24292e" />;
-      default:
-        return null;
-    }
-  };
-
-  const getProviderName = () => {
-    switch (user?.provider) {
-      case 'google': return 'Google';
-      case 'github': return 'GitHub';
-      default: return 'Desconhecido';
-    }
-  };
-
   if (!user) {
     return (
       <SafeAreaView style={styles.container}>
@@ -61,56 +42,43 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header de Boas-vindas */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Bem-vindo!</Text>
-          <Text style={styles.userName}>{user?.name} 👋</Text>
+          <Text style={styles.greeting}>Olá,</Text>
+          <Text style={styles.userName}>{user.name} 👋</Text>
         </View>
 
         {/* Card do Perfil */}
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              {user?.photo ? (
+              {user.photo ? (
                 <Image source={{ uri: user.photo }} style={styles.avatar} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
                   <Text style={styles.avatarText}>
-                    {user?.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                   </Text>
                 </View>
               )}
               <View style={styles.providerBadge}>
-                {getProviderIcon()}
+                <AntDesign name="google" size={16} color="#4285F4" />
               </View>
             </View>
             
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{user?.name}</Text>
-              <Text style={styles.profileEmail}>{user?.email}</Text>
-              <Text style={styles.providerText}>
-                Conectado via {getProviderName()}
-              </Text>
+              <Text style={styles.profileName}>{user.name}</Text>
+              <Text style={styles.profileEmail}>{user.email}</Text>
+              <Text style={styles.providerText}>Conectado via Google</Text>
             </View>
           </View>
 
           <View style={styles.divider} />
 
-          <View style={styles.infoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Status:</Text>
-              <View style={styles.statusBadge}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusText}>Online</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Provedor:</Text>
-              <View style={styles.providerRow}>
-                {getProviderIcon()}
-                <Text style={styles.infoValue}>{getProviderName()}</Text>
-              </View>
+          <View style={styles.statusContainer}>
+            <View style={styles.statusBadge}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>Online</Text>
             </View>
           </View>
         </View>
@@ -155,7 +123,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   greeting: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#8D8D99',
     marginBottom: 4,
   },
@@ -178,7 +146,6 @@ const styles = StyleSheet.create({
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
   },
   avatarContainer: {
     position: 'relative',
@@ -207,7 +174,7 @@ const styles = StyleSheet.create({
     bottom: -4,
     right: -4,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -238,34 +205,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#E1E1E6',
     marginVertical: 20,
   },
-  infoSection: {
-    gap: 16,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#8D8D99',
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#121214',
-    marginLeft: 8,
-  },
-  providerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  statusContainer: {
+    alignItems: 'flex-start',
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#00875F20',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   statusDot: {
