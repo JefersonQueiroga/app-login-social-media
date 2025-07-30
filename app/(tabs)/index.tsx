@@ -45,7 +45,7 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.greeting}>Olá,</Text>
-          <Text style={styles.userName}>{user.name} 👋</Text>
+          <Text style={styles.userName}>{user.name} </Text>
         </View>
 
         {/* Card do Perfil */}
