@@ -10,10 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.apploginsocialmedia"
+      "bundleIdentifier": "com.jeferson.apploginsocialmedia"
     },
     "android": {
-      "package": "com.anonymous.apploginsocialmedia",
+      "package": "com.jeferson.apploginsocialmedia",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -39,7 +39,10 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme":  "com.googleusercontent.apps.331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu"
+          "iosClientId": "331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu.apps.googleusercontent.com",
+          "iosUrlScheme":  "com.googleusercontent.apps.331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu",
+          "iosReverseClientId": "com.googleusercontent.apps.331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu"
+
         }
       ]
     ],

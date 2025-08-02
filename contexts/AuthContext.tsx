@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function configureGoogleSignIn() {
     GoogleSignin.configure({
       webClientId: '331594167804-4qgvncnrmc78aude5auvn9s01iacm5bd.apps.googleusercontent.com', // Substitua pelo seu
+      iosClientId: '331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu.apps.googleusercontent.com', // Substitua pelo seu
       offlineAccess: true,
     });
   }
