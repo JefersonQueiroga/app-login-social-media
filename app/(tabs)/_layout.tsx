@@ -27,7 +27,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
-          // MUDANÇA: Mostrar sempre, mas só acessível se logado
         }}
       />
       
@@ -38,8 +37,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="log-in" size={size} color={color} />
           ),
-          // MUDANÇA: Ocultar se já estiver logado
           href: user ? null : '/login',
+        }}
+      />
+
+      <Tabs.Screen
+        name="token"
+        options={{
+          title: 'Token',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="bell" size={size} color={color} />
+          ),
         }}
       />
       

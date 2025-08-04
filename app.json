@@ -18,7 +18,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": ["RECEIVE_BOOT_COMPLETED"]
     },
     "web": {
       "bundler": "metro",
@@ -42,7 +43,14 @@
           "iosClientId": "331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu.apps.googleusercontent.com",
           "iosUrlScheme":  "com.googleusercontent.apps.331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu",
           "iosReverseClientId": "com.googleusercontent.apps.331594167804-5ffcphusqkjj545l8o067e4m4ev0apmu"
-
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": []
         }
       ]
     ],
